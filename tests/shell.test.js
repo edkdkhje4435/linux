@@ -1,4 +1,4 @@
-﻿const Shell = require('../js/shell.js');
+const Shell = require('../js/shell.js');
 let fails = 0;
 function t(name, cond){ if(!cond){ fails++; console.log('FAIL', name);} else console.log('ok  ', name); }
 const s = new Shell();
@@ -38,6 +38,18 @@ t('complete cmd', s.complete('mkd').cands[0] === 'mkdir');
 t('complete file', s.complete('cat gh').cands[0] === 'ghichu.txt');
 t('perm denied read', (r('chmod 000 ghichu.txt'), r('cat ghichu.txt').err.includes('Permission denied')));
 t('write to non-existing dir', r('echo a > nodir/x').err.includes('No such file'));
+t('dir x perm blocks cd', (r('mkdir secret'), r('chmod 000 secret'), r('cd secret').err.includes('Permission denied')));
+t('dir r perm blocks ls', r('ls secret').err.includes('Permission denied'));
+t('dir chmod 700 unlocks cd', (r('chmod 700 secret'), r('cd secret'), s.cwd === '/home/hocvien/secret', r('cd ..')));
+t('chain && success', (r('mkdir cdir && touch cdir/ok.txt'), s.exists('cdir/ok.txt')));
+t('chain && stops on fail', (r('cd nonexist && touch cdir/bad.txt'), !s.exists('cdir/bad.txt')));
+t('chain || runs on fail', r('cd nonexist || echo fallback').out.includes('fallback'));
+t('find -name', r('find . -name "*.txt"').out.includes('ghichu.txt'));
+t('tar -czf and -tzf', (r('tar -czf pack.tar.gz Documents'), s.exists('pack.tar.gz') && r('tar -tzf pack.tar.gz').out.includes('baocao.txt')));
+t('df -h and free -h', r('df -h').out.includes('Filesystem') && r('free -h').out.includes('Mem:'));
+t('ps aux and pgrep', r('ps aux').out.includes('sshd') && r('pgrep -c nginx').out.trim() === '2');
+t('systemctl and sudo', (r('systemctl stop nginx').err.includes('Access denied'), r('sudo systemctl stop nginx'), r('systemctl is-active nginx').out.trim() === 'inactive', r('sudo systemctl start nginx'), r('systemctl is-active nginx').out.trim() === 'active'));
+t('journalctl -u nginx', r('journalctl -u nginx').out.includes('nginx'));
+t('ip a and ping', r('ip a').out.includes('192.168.1.50') && r('ping -c 2 8.8.8.8').out.includes('bytes from'));
 console.log(fails ? fails + ' FAILED' : 'ALL PASSED');
 process.exit(fails?1:0);
-

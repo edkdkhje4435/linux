@@ -298,7 +298,11 @@ scp baocao.txt an@192.168.1.50:~/      # chép file qua SSH</code></pre>
 <h3>4. Tường lửa firewalld (nhận biết)</h3>
 <pre><code>sudo firewall-cmd --list-all
 sudo firewall-cmd --permanent --add-service=http
-sudo firewall-cmd --reload</code></pre>`,
+sudo firewall-cmd --reload</code></pre>
+
+<h3>Thử ngay (mô phỏng kiểm tra mạng)</h3>
+<p>Gõ thử: <code>ip a</code>, <code>ip route</code>, <code>ping -c 4 8.8.8.8</code>, <code>ping -c 4 google.com</code>.</p>
+<div class="mini-term" data-id="t-mang"></div>`,
     quiz: [
       { q: 'ping được 8.8.8.8 nhưng không ping được google.com. Nghi ngờ lỗi gì?', o: ['Hỏng card mạng', 'DNS', 'Hết RAM', 'Sai quyền file'], a: 1, why: 'Đến được IP nghĩa là mạng thông; việc đổi tên → IP (DNS) đang hỏng.' },
       { q: 'File nào là khóa RIÊNG TƯ khi tạo bằng ssh-keygen -t ed25519?', o: ['id_ed25519.pub', 'id_ed25519', 'known_hosts', 'authorized_keys'], a: 1, why: 'Bản không có đuôi .pub là khóa riêng tư.' },
@@ -309,7 +313,8 @@ sudo firewall-cmd --reload</code></pre>`,
 
   {
     id: 'van-hanh', title: 'Vận hành: gói, dịch vụ, tiến trình, lịch, log', minutes: 30, level: 'Trung bình', src: 'Chương 7',
-    summary: 'dnf/apt, systemctl, ps/top/kill, cron, journalctl – bộ kỹ năng quản trị cốt lõi.',
+    summary: 'dnf/apt, systemctl, ps/top/kill, df/du/free, cron, journalctl – bộ kỹ năng quản trị cốt lõi.',
+    practice: 'cuu-dich-vu',
     body: `
 <h3>1. Cài phần mềm bằng trình quản lý gói</h3>
 <table>
@@ -330,11 +335,15 @@ sudo systemctl enable --now nginx   # tự chạy khi khởi động + bật lu�
 systemctl is-enabled nginx</code></pre>
 <div class="tip"><code>start</code> = chạy <b>bây giờ</b>; <code>enable</code> = chạy <b>mỗi lần bật máy</b>. Hai việc độc lập nhau!</div>
 
-<h3>3. Tiến trình (process)</h3>
-<pre><code>ps aux | grep nginx    # tìm tiến trình theo tên
+<h3>3. Tiến trình (process) & tài nguyên (đĩa, RAM)</h3>
+<pre><code>ps aux | grep nginx    # tìm tiến trình theo tên (kèm dòng grep)
+pgrep -a nginx         # tìm đúng tiến trình nginx (gọn, không lẫn grep)
 top                    # theo dõi trực tiếp (thoát bằng q)
 kill 1234              # yêu cầu tiến trình PID 1234 dừng lịch sự
-kill -9 1234           # cưỡng chế dừng (dùng khi kill thường không được)</code></pre>
+kill -9 1234           # cưỡng chế dừng (dùng khi kill thường không được)
+df -h                  # ổ đĩa còn trống bao nhiêu?
+du -sh *               # thư mục/file nào đang chiếm dung lượng?
+free -h                # RAM còn trống bao nhiêu (nhìn cột available)?</code></pre>
 
 <h3>4. Lập lịch với cron</h3>
 <pre><code>crontab -e             # sửa lịch của bạn
@@ -348,7 +357,12 @@ kill -9 1234           # cưỡng chế dừng (dùng khi kill thường không 
 journalctl -u nginx -f            # theo dõi log trực tiếp (Ctrl+C để thoát)
 journalctl -p err -b              # chỉ lỗi từ lần khởi động này
 tail -f /var/log/messages         # log truyền thống (RHEL: /var/log/messages)</code></pre>
-<div class="tip"><b>Quy trình xử lý sự cố:</b> (1) <code>systemctl status</code> xem triệu chứng → (2) <code>journalctl -u</code> đọc nguyên nhân → (3) sửa cấu hình → (4) restart → (5) kiểm tra lại. Ghi lại vào nhật ký lab mỗi lần!</div>`,
+<div class="tip"><b>Quy trình xử lý sự cố:</b> (1) <code>systemctl status</code> xem triệu chứng → (2) <code>journalctl -u</code> đọc nguyên nhân → (3) sửa cấu hình → (4) restart → (5) kiểm tra lại. Ghi lại vào nhật ký lab mỗi lần!</div>
+
+<h3>Thực hành chẩn đoán ngay</h3>
+<p>Gõ thử: <code>systemctl status nginx</code>, <code>journalctl -u nginx</code>, <code>sudo systemctl start nginx</code>, <code>df -h</code>, <code>du -sh *</code>, <code>free -h</code>, <code>ps aux</code>.</p>
+<div class="mini-term" data-id="t-vanhanh"></div>
+<p>Rồi sang <a href="#/practice/cuu-dich-vu">thử thách "Cứu dịch vụ web bị dừng"</a>.</p>`,
     quiz: [
       { q: 'Muốn dịch vụ tự chạy mỗi lần khởi động máy?', o: ['systemctl start', 'systemctl enable', 'systemctl status', 'systemctl mask'], a: 1, why: 'enable = tự khởi động cùng hệ thống.' },
       { q: 'Dòng cron "*/5 * * * *" nghĩa là?', o: ['Mỗi 5 giờ', 'Mỗi 5 phút', 'Ngày mùng 5', 'Thứ 5 hằng tuần'], a: 1, why: 'Trường đầu tiên là phút; */5 = mỗi 5 phút.' },
@@ -359,7 +373,8 @@ tail -f /var/log/messages         # log truyền thống (RHEL: /var/log/message
 
   {
     id: 'shell-script', title: 'Shell script đầu tiên', minutes: 30, level: 'Trung bình', src: 'Chương 5',
-    summary: 'Biến, tham số, if, for, hàm, và script sao lưu có ghi log.',
+    summary: 'Biến, tham số, if, for, ghép lệnh && / ||, tìm & nén file, và script sao lưu có ghi log.',
+    practice: 'tim-nen',
     body: `
 <h3>1. Script = danh sách lệnh lưu vào file</h3>
 <pre><code>#!/bin/bash
@@ -386,10 +401,14 @@ else
 fi</code></pre>
 <p>Một số phép thử: <code>-f</code> file, <code>-d</code> thư mục, <code>-z</code> chuỗi rỗng, <code>-eq -ne -lt -gt</code> so sánh số, <code>==</code> so sánh chuỗi. <b>Cần có dấu cách</b> trong <code>[ ... ]</code>.</p>
 
-<h3>4. Vòng lặp và hàm</h3>
+<h3>4. Vòng lặp, hàm và ghép lệnh && / ||</h3>
 <pre><code>for f in *.txt; do
+    [ -f "$f" ] || continue    # bỏ qua nếu không có file .txt nào khớp
     echo "Tìm thấy: $f"
 done
+
+# Ghép lệnh theo kết quả thành công (&&) hay thất bại (||):
+mkdir -p backup && tar -czf backup/code.tar.gz Documents || echo "Lỗi nén!"
 
 kiemtra() {
     systemctl is-active --quiet "$1" && echo "$1: OK" || echo "$1: DỪNG"
@@ -410,6 +429,10 @@ else
     exit 1
 fi</code></pre>
 <div class="tip"><b>Tư duy lập trình:</b> viết script <b>nhỏ → chạy thử → mở rộng</b>. Gỡ lỗi bằng <code>bash -x script.sh</code> (in từng lệnh khi chạy). Luôn đặt biến trong dấu ngoặc kép <code>"$bien"</code> để tránh lỗi với tên có dấu cách.</div>
+
+<h3>Thực hành ghép lệnh, tìm & nén file</h3>
+<p>Gõ thử trong terminal dưới đây: <code>find . -name "*.txt"</code>, <code>mkdir -p backup && tar -czf backup/doc.tar.gz Documents</code>, <code>tar -tzf backup/doc.tar.gz</code>.</p>
+<div class="mini-term" data-id="t-script"></div>
 
 <h3>Bài tự luyện</h3>
 <ol>

@@ -1,27 +1,25 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="vi">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Linux Khá»Ÿi Äáº§u â€“ Há»c Linux cho ngÆ°á»i má»›i</title>
-  <meta name="description" content="Há»c Linux tá»« con sá»‘ 0: bÃ i há»c tiáº¿ng Viá»‡t, terminal giáº£ láº­p an toÃ n, thá»­ thÃ¡ch tá»± cháº¥m, trá»£ lÃ½ AI tÃ¹y chá»n.">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230f172a'/%3E%3Cpath d='M22 30l24 20-24 20' stroke='%2322d3ee' stroke-width='9' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M54 72h26' stroke='%2322d3ee' stroke-width='9' stroke-linecap='round'/%3E%3C/svg%3E">
+  <title>Linux Khởi Đầu – E2E Test</title>
   <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
   <header class="topbar">
-    <button id="menuBtn" class="icon-btn" aria-label="Má»Ÿ menu">â˜°</button>
-    <a class="brand" href="#/"><span class="logo">&gt;_</span> Linux Khá»Ÿi Äáº§u</a>
+    <button id="menuBtn" class="icon-btn" aria-label="Mở menu">&#9776;</button>
+    <a class="brand" href="#/"><span class="logo">&gt;_</span> Linux Khởi Đầu</a>
     <div class="spacer"></div>
-    <button id="themeBtn" class="icon-btn" aria-label="Äá»•i giao diá»‡n sÃ¡ng/tá»‘i" title="Äá»•i sÃ¡ng/tá»‘i">ðŸŒ“</button>
+    <button id="themeBtn" class="icon-btn" aria-label="Đổi giao diện sáng/tối" title="Đổi sáng/tối">&#127763;</button>
   </header>
 
   <div class="layout">
-    <nav id="sidebar" class="sidebar" aria-label="Äiá»u hÆ°á»›ng"></nav>
+    <nav id="sidebar" class="sidebar" aria-label="Điều hướng"></nav>
     <main id="view" class="view" tabindex="-1"></main>
   </div>
 
-  <button id="aiFab" class="ai-fab" title="Há»i gia sÆ° AI">ðŸ¤– Há»i AI</button>
+  <button id="aiFab" class="ai-fab" title="Hỏi gia sư AI">&#129302; Hỏi AI</button>
   <aside id="aiPanel" class="ai-panel" hidden></aside>
 
   <script src="../js/shell.js"></script>
@@ -39,9 +37,15 @@ function go(h){ location.hash = h; window.dispatchEvent(new Event('hashchange'))
 function typeCmd(c){ var i = document.querySelector('.term-line input'); i.value = c; i.dispatchEvent(new KeyboardEvent('keydown', {key:'Enter', bubbles:true})); }
 var fails = 0; function T(n, ok){ if(!ok){ fails++; L('FAIL ' + n); } else L('ok   ' + n); }
 try {
-  ['#/', '#/mindset', '#/cheatsheet', '#/resources', '#/own', '#/practice', '#/nope'].forEach(function(h){
+  localStorage.clear();
+  ['#/', '#/mindset', '#/search', '#/cheatsheet', '#/resources', '#/own', '#/practice', '#/nope'].forEach(function(h){
     go(h); T('route ' + h + ' renders', document.getElementById('view').innerText.length > 10);
   });
+  // global search
+  go('#/search');
+  var gs = document.getElementById('gSearchInp'); gs.value = 'nginx'; gs.dispatchEvent(new Event('input'));
+  T('global search finds nginx across sections', document.getElementById('gSearchOut').innerText.indexOf('nginx') >= 0);
+
   // lessons
   LESSONS.forEach(function(l){
     go('#/lesson/' + l.id);
@@ -55,13 +59,15 @@ try {
   });
   function progressScore(l){ return JSON.parse(localStorage.getItem('lh_progress')).quiz[l.id]; }
   T('all lessons auto-marked done', LESSONS.every(function(l){ return JSON.parse(localStorage.getItem('lh_progress')).lessons[l.id]; }));
-  // challenges
+  // challenges (all 7)
   var sol = {
     'dieu-huong': ['pwd','ls','cd Documents','cat baocao.txt'],
     'tao-file': ['mkdir linux-lab','cd linux-lab','echo hello > nhatky.txt','cp nhatky.txt backup.txt','mv nhatky.txt nhatky-cu.txt'],
     'don-dep': ['rmdir rac','rm -r rac'],
-    'phan-quyen': ['ls -l','chmod u+x script.sh','chmod 600 bimat.txt'],
-    'loc-log': ['grep ERROR log.txt > loi.txt','grep ERROR log.txt | wc -l > dem.txt']
+    'phan-quyen': ['ls -l','chmod u+x script.sh','chmod 600 bimat.txt','chmod 700 ho-so'],
+    'loc-log': ['grep ERROR log.txt > loi.txt','grep ERROR log.txt | wc -l > dem.txt'],
+    'tim-nen': ['find du-an -name "*.conf" > ds-conf.txt','tar -czf backup.tar.gz du-an'],
+    'cuu-dich-vu': ['systemctl status nginx','journalctl -u nginx','sudo systemctl start nginx','systemctl is-active nginx > trang-thai.txt']
   };
   CHALLENGES.forEach(function(c){
     go('#/practice/' + c.id);
@@ -74,11 +80,12 @@ try {
   });
   go('#/practice/loc-log'); typeCmd('echo wrong > dem.txt'); T('wrong answer not accepted', !document.querySelector('#result .success'));
   // cheatsheet search
-  go('#/cheatsheet'); var q = document.getElementById('q'); q.value = 'grep'; q.dispatchEvent(new Event('input'));
-  T('cheatsheet search grep', document.querySelectorAll('#list .cmd-card').length >= 1);
-  // ===== trang mới =====
+  go('#/cheatsheet'); var q = document.getElementById('q'); q.value = 'pgrep'; q.dispatchEvent(new Event('input'));
+  T('cheatsheet search pgrep', document.querySelectorAll('#list .cmd-card').length >= 1);
+  // videos
   go('#/videos'); T('videos page cards = ' + VIDEOS.length, document.querySelectorAll('#view .vid').length === VIDEOS.length);
   T('videos have thumbnail + link', Array.prototype.every.call(document.querySelectorAll('#view .vid'), function(a){ return /youtube\.com\/watch\?v=[\w-]{11}/.test(a.href) && a.querySelector('img'); }));
+  // reading (all 8)
   READING.forEach(function(r){
     go('#/reading/' + r.id);
     T('reading ' + r.id + ' hidden steps first', document.getElementById('rvBox').hidden === true);
@@ -90,6 +97,7 @@ try {
   go('#/problems'); T('problems page ' + PLAYBOOK.length + ' items', document.querySelectorAll('#view details').length === PLAYBOOK.length);
   go('#/final'); document.querySelectorAll('#fl li').forEach(function(li){ li.click(); });
   T('final checklist all ticked', /Chúc mừng/.test(document.getElementById('fm').innerText));
+  T('progress backup box exists', !!document.getElementById('progBox'));
   go('#/publish'); var pv = document.getElementById('view').innerText;
   T('publish page has GitHub + billing sections', /GitHub Pages/.test(pv) && /Set up billing/.test(pv) && /API key/.test(pv));
   T('publish page shows video cards', document.querySelectorAll('#view .vid').length >= 4);
@@ -99,6 +107,7 @@ try {
   // AI panel
   document.getElementById('aiFab').click(); T('AI panel opens', !document.getElementById('aiPanel').hidden && document.querySelectorAll('.msg').length >= 1);
   T('AI no-key prompt shown', document.getElementById('aiSet') && !document.getElementById('aiSet').hidden);
+  T('AI default model is gemini-3.8-flash', document.getElementById('mInp').value === 'gemini-3.8-flash');
   // theme
   document.getElementById('themeBtn').click(); T('theme toggles', !!document.documentElement.getAttribute('data-theme'));
   // copy buttons
@@ -109,9 +118,3 @@ L(fails ? fails + ' FAILED' : 'ALL PASSED');
 </script>
 </body>
 </html>
-
-
-</body>
-</html>
-
-
