@@ -44,7 +44,7 @@
       if (history.length > 20) history = history.slice(-20);
 
       var mName = AI.getModel().replace(/^models\//, '');
-      var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(mName) + ':generateContent';
+      var url = 'https://generativelanguage.googleapis.com/v1/models/' + encodeURIComponent(mName) + ':generateContent';
 
       var controller = new AbortController();
       var timeoutId = setTimeout(function () { controller.abort(); }, 25000);
