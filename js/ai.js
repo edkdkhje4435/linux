@@ -4,7 +4,7 @@
  * Lấy key miễn phí: https://aistudio.google.com/apikey
  */
 (function () {
-  var KEY = 'lh_gemini_key', MODEL = 'lh_gemini_model', DEFAULT_MODEL = 'gemini-2.5-flash';
+  var KEY = 'lh_gemini_key', MODEL = 'lh_gemini_model', DEFAULT_MODEL = 'gemini-3.8-flash';
 
   var SYSTEM = [
     'Bạn là "Gia sư Linux" cho người MỚI BẮT ĐẦU, trả lời bằng tiếng Việt, ngắn gọn, thân thiện.',
@@ -42,9 +42,16 @@
       var text = context ? '[Ngữ cảnh: ' + context + ']\n' + question : question;
       history.push({ role: 'user', parts: [{ text: text }] });
       if (history.length > 20) history = history.slice(-20);
-      var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(AI.getModel()) + ':generateContent';
+
+      var mName = AI.getModel().replace(/^models\//, '');
+      var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(mName) + ':generateContent';
+
+      var controller = new AbortController();
+      var timeoutId = setTimeout(function () { controller.abort(); }, 25000);
+
       return fetch(url, {
         method: 'POST',
+        signal: controller.signal,
         headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
         body: JSON.stringify({
           systemInstruction: { parts: [{ text: SYSTEM }] },
@@ -52,6 +59,7 @@
           generationConfig: { temperature: 0.5, maxOutputTokens: 1200 }
         })
       }).then(function (r) {
+        clearTimeout(timeoutId);
         return r.json().then(function (j) {
           if (!r.ok) {
             history.pop();
@@ -60,10 +68,17 @@
           }
           var t = j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts
             ? j.candidates[0].content.parts.map(function (p) { return p.text || ''; }).join('') : '';
-          if (!t) { history.pop(); throw new Error('AI không trả về nội dung (có thể bị bộ lọc an toàn chặn). Hãy thử diễn đạt lại.'); }
+          if (!t) { history.pop(); throw new Error('AI không trả về nội dung. Hãy thử diễn đạt lại.'); }
           history.push({ role: 'model', parts: [{ text: t }] });
           return t;
         });
+      }).catch(function (err) {
+        clearTimeout(timeoutId);
+        if (err.name === 'AbortError') {
+          history.pop();
+          throw new Error('Yêu cầu mất quá 25 giây chưa phản hồi. Vui lòng kiểm tra lại mạng hoặc thử lại.');
+        }
+        throw err;
       });
     }
   };
