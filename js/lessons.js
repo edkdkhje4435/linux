@@ -97,117 +97,79 @@ window.LESSONS = [
 <p>Ví dụ: Khi bạn di chuyển vào thư mục <code>Documents</code>, dấu nhắc sẽ tự động đổi thành <code>hocvien@linux-lab:~/Documents$</code> để bạn luôn biết mình đang đứng ở đâu.</p>
 
 <h3>3. Giải phẫu một dòng lệnh: Lệnh – Tùy chọn – Đối số</h3>
-<p>Hầu hết câu lệnh Linux đều tuân theo công thức 3 phần cách nhau bởi <b>dấu cách (khoảng trắng)</b>:</p>
+<p>Mọi câu lệnh Linux đều tuân theo công thức 3 phần:</p>
 <pre><code>ls     -l     Documents
-│      │      └─ 3. ĐỐI SỐ (Argument): Tác động lên cái gì / ở đâu? (ở đây là thư mục Documents)
-│      └──────── 2. TÙY CHỌN (Option / Flag): Chạy theo chế độ nào? (bắt đầu bằng dấu gạch ngang -)
+│      │      └─ 3. ĐỐI SỐ (Argument): Tác động lên cái gì? (ở đây là thư mục Documents)
+│      └──────── 2. TÙY CHỌN (Option / Flag): Chạy theo chế độ nào? (bắt đầu bằng dấu -)
 └─────────────── 1. TÊN LỆNH (Command): Muốn làm hành động gì? (ls = list = liệt kê)</code></pre>
 
-<h4>❓ Giải thích kỹ: "Tùy chọn (Option / Flag) thay đổi cách chạy" nghĩa là thế nào?</h4>
-<p>Hãy tưởng tượng <b>Tên lệnh (<code>ls</code>)</b> là chiếc quạt máy, còn <b>Tùy chọn (<code>-l</code>, <code>-a</code>)</b> là các nút bấm chế độ trên quạt (số 1, số 2, quay trái/phải). Cùng là hành động "liệt kê file" (<code>ls</code>), nhưng khi bạn gắn thêm tùy chọn, <b>kết quả hiển thị ra màn hình sẽ thay đổi hẳn</b>.</p>
-<p>Hãy xem <b>so sánh thực tế ngay trên màn hình Terminal</b> dưới đây:</p>
-
-<pre><code># TRƯỜNG HỢP 1: Gõ lệnh trần KHÔNG có tùy chọn (chỉ hiện tên file ngang hàng, giấu file ẩn)
+<details class="sec-fold" open>
+<summary>🔍 Bấm để xem: So sánh 5 trường hợp màn hình thực tế khi thêm tùy chọn (-l, -a, -la)</summary>
+<div class="sec-content">
+<p>Hãy tưởng tượng <b>Tên lệnh (<code>ls</code>)</b> là chiếc quạt máy, còn <b>Tùy chọn (<code>-l</code>, <code>-a</code>)</b> là các nút bấm chế độ. Cùng là hành động "liệt kê file" (<code>ls</code>), nhưng khi gắn thêm tùy chọn, <b>kết quả hiển thị ra màn hình sẽ thay đổi hẳn</b>:</p>
+<pre><code># 1. Gõ lệnh trần (chỉ hiện tên file ngang hàng, giấu file ẩn)
 hocvien@linux-lab:~$ ls
 Documents  Downloads  ghichu.txt
 
-# TRƯỜNG HỢP 2: Thêm tùy chọn -l (viết tắt của "long" = dạng danh sách chi tiết)
-# → Thay đổi cách hiển thị: mỗi file 1 dòng, hiện rõ Quyền hạn, Chủ sở hữu, Dung lượng (byte), Ngày sửa!
+# 2. Thêm -l (long = dạng chi tiết: hiện rõ Quyền rwx, Chủ sở hữu, Dung lượng byte, Ngày sửa)
 hocvien@linux-lab:~$ ls -l
 total 12
 drwxr-xr-x 1 hocvien hocvien  4096 Nov  2 12:00 Documents
 drwxr-xr-x 1 hocvien hocvien  4096 Nov  2 12:00 Downloads
 -rw-r--r-- 1 hocvien hocvien    45 Nov  2 12:00 ghichu.txt
 
-# TRƯỜNG HỢP 3: Thêm tùy chọn -a (viết tắt của "all" = tất cả)
-# → Thay đổi phạm vi: hiện thêm cả các file ẩn bắt đầu bằng dấu chấm (như .cauhinh) mà ls thường giấu đi!
+# 3. Thêm -a (all = tất cả: hiện thêm cả file ẩn bắt đầu bằng dấu chấm như .cauhinh)
 hocvien@linux-lab:~$ ls -a
 .  ..  .cauhinh  Documents  Downloads  ghichu.txt
 
-# TRƯỜNG HỢP 4: Gộp cả 2 tùy chọn ngắn thành -la (tương đương viết rời: ls -l -a)
-# → Vừa hiện tất cả file ẩn (-a), vừa in dạng bảng chi tiết từng dòng (-l)!
+# 4. Gộp thành -la: vừa hiện file ẩn (-a), vừa in chi tiết từng dòng (-l)
 hocvien@linux-lab:~$ ls -la
-total 24
-drwxr-xr-x 1 hocvien hocvien  4096 Nov  2 12:00 .
-drwxr-xr-x 1 hocvien hocvien  4096 Nov  2 12:00 ..
--rw-r--r-- 1 hocvien hocvien     5 Nov  2 12:00 .cauhinh
-drwxr-xr-x 1 hocvien hocvien  4096 Nov  2 12:00 Documents
-drwxr-xr-x 1 hocvien hocvien  4096 Nov  2 12:00 Downloads
--rw-r--r-- 1 hocvien hocvien    45 Nov  2 12:00 ghichu.txt
 
-# TRƯỜNG HỢP 5: Thêm ĐỐI SỐ "Documents" vào cuối (ls -l Documents)
-# → Thay vì xem thư mục đang đứng, ta bảo lệnh ls hãy soi vào bên trong thư mục Documents!
+# 5. Thêm đối số Documents (ls -l Documents): xem chi tiết bên trong Documents
 hocvien@linux-lab:~$ ls -l Documents
 total 4
 -rw-r--r-- 1 hocvien hocvien    15 Nov  2 12:00 baocao.txt</code></pre>
+<div class="tip"><b>Mẹo nhớ cực dễ:</b> Các tùy chọn là chữ cái đầu tiếng Anh: <code>-l</code> = <b>l</b>ong &nbsp;|&nbsp; <code>-a</code> = <b>a</b>ll &nbsp;|&nbsp; <code>-h</code> = <b>h</b>uman-readable &nbsp;|&nbsp; <code>-r</code> = <b>r</b>ecursive &nbsp;|&nbsp; <code>-n</code> = <b>n</b>umber.</div>
+</div>
+</details>
 
-<div class="tip"><b>Mẹo nhớ tùy chọn cực dễ (không cần học vẹt):</b> Các tùy chọn trong Linux không phải chữ cái ngẫu nhiên, mà là <b>chữ cái đầu tiếng Anh</b> của từ mô tả chức năng đó:
-<br>• <code>-l</code> = <b>l</b>ong (dạng dài, chi tiết) &nbsp;|&nbsp; <code>-a</code> = <b>a</b>ll (tất cả, gồm cả file ẩn)
-<br>• <code>-h</code> = <b>h</b>uman-readable (đổi số byte khó đọc như <code>4096</code> thành <code>4K</code>, <code>20G</code> cho người dễ đọc)
-<br>• <code>-r</code> = <b>r</b>ecursive (đệ quy – làm cho cả thư mục và toàn bộ bên trong nó) hoặc <b>r</b>everse (đảo ngược)
-<br>• <code>-n</code> = <b>n</b>umber (số dòng, ví dụ <code>head -n 5</code> là lấy 5 dòng đầu)
-<br>• <b>Một dấu gạch ngang (<code>-l</code>, <code>-a</code>)</b> là tùy chọn viết tắt 1 chữ cái (gộp chung được thành <code>-la</code>). <b>Hai dấu gạch ngang (<code>--help</code>, <code>--all</code>)</b> là tùy chọn viết nguyên từ tiếng Anh (không gộp chung được).</div>
+<h3>4. Ba phím cứu hộ – Kịch bản gõ thực tế trên Terminal</h3>
+<p>Dân chuyên nghiệp dùng 3 phím này để gõ nhanh gấp 5 lần và không bao giờ sợ sai chính tả:</p>
 
-<h3>4. Ba phím cứu hộ – Ví dụ thực tế cách dùng trong Terminal</h3>
-<p>Người dùng Linux chuyên nghiệp gõ rất nhanh và ít sai chính tả không phải vì họ gõ 10 ngón siêu đẳng, mà vì họ dùng phím <kbd>Tab</kbd> và <kbd>↑</kbd> liên tục. Hãy xem kịch bản thực tế dưới đây:</p>
-
-<h4>① Phím <kbd>Tab</kbd>: Tự động điền nốt tên lệnh hoặc tên file/thư mục</h4>
-<p>Khi bạn mới gõ được vài chữ cái đầu của tên file hoặc thư mục rồi bấm phím <kbd>Tab</kbd> trên bàn phím, Shell sẽ tìm xem có file nào khớp không và <b>tự động viết nốt phần còn lại cho bạn</b>.</p>
+<details class="sec-fold" open>
+<summary>⌨️ Bấm để xem: Kịch bản dùng phím Tab, mũi tên ↑ và Ctrl+C</summary>
+<div class="sec-content">
+<h4>① Phím <kbd>Tab</kbd>: Tự động điền nốt tên lệnh / tên file</h4>
 <pre><code># KỊCH BẢN A: Có duy nhất 1 tên khớp → Bấm Tab 1 lần là tự điền xong!
-# Bạn muốn đọc file "ghichu.txt". Thay vì gõ đủ 10 chữ dễ sai chính tả, bạn chỉ gõ "cat ghi" rồi bấm [Tab]:
-hocvien@linux-lab:~$ cat ghi[Bấm phím Tab]
-# → Màn hình tự động biến thành:
-hocvien@linux-lab:~$ cat ghichu.txt 
+# Muốn đọc "ghichu.txt", chỉ cần gõ "cat ghi" rồi bấm [Tab]:
+hocvien@linux-lab:~$ cat ghi[Tab]  → tự biến thành →  hocvien@linux-lab:~$ cat ghichu.txt
 
-# KỊCH BẢN B: Có nhiều tên cùng bắt đầu giống nhau → Bấm Tab để xem gợi ý!
-# Trong thư mục có cả "Documents" và "Downloads" (cùng bắt đầu bằng chữ "Do").
-# Nếu bạn chỉ gõ "cd Do" rồi bấm [Tab], máy sẽ điền tới phần chung "Do" và in ra các lựa chọn:
-hocvien@linux-lab:~$ cd Do[Bấm phím Tab]
-Documents/  Downloads/
-# → Lúc này bạn thấy gợi ý, chỉ cần gõ thêm chữ "c" (thành "cd Doc") rồi bấm [Tab] lần nữa:
-hocvien@linux-lab:~$ cd Doc[Bấm phím Tab]
-# → Máy tự điền nốt thành:
-hocvien@linux-lab:~$ cd Documents/</code></pre>
+# KỊCH BẢN B: Trùng chữ cái đầu (Documents và Downloads cùng bắt đầu bằng "Do"):
+hocvien@linux-lab:~$ cd Do[Tab]    → in ra gợi ý: Documents/  Downloads/
+hocvien@linux-lab:~$ cd Doc[Tab]   → tự điền xong: cd Documents/</code></pre>
 
-<h4>② Phím mũi tên <kbd>↑</kbd> / <kbd>↓</kbd>: Gọi lại câu lệnh cũ để chạy lại hoặc sửa lỗi</h4>
-<pre><code># KỊCH BẢN: Bạn định gõ "cat ghichu.txt" nhưng gõ thiếu mất chữ "t" ở cuối:
-hocvien@linux-lab:~$ cat ghichu.tx
-cat: ghichu.tx: No such file or directory
+<h4>② Phím mũi tên <kbd>↑</kbd> / <kbd>↓</kbd>: Gọi lại câu lệnh vừa gõ</h4>
+<pre><code># Lỡ gõ thiếu chữ: cat ghichu.tx (báo lỗi No such file)
+# Bấm phím mũi tên lên [↑] 1 lần: dòng cũ hiện lại ngay, chỉ việc gõ thêm chữ "t" rồi Enter!</code></pre>
 
-# Thay vì phải gõ lại cả dòng từ đầu, bạn chỉ cần bấm phím mũi tên lên [↑] 1 lần:
-hocvien@linux-lab:~$ [Bấm phím ↑] → dòng "cat ghichu.tx" lập tức hiện lại!
-# Bạn chỉ việc gõ thêm chữ "t" vào cuối rồi nhấn Enter.</code></pre>
+<h4>③ Tổ hợp phím <kbd>Ctrl</kbd> + <kbd>C</kbd>: Hủy dòng đang gõ dở hoặc dừng lệnh</h4>
+<pre><code>hocvien@linux-lab:~$ cp -r thu_muc_nham /duong/dan/sai[Ctrl + C]
+hocvien@linux-lab:~$ cp -r thu_muc_nham /duong/dan/sai^C   ← hủy ngay, không bị chạy nhầm!</code></pre>
+</div>
+</details>
 
-<h4>③ Tổ hợp phím <kbd>Ctrl</kbd> + <kbd>C</kbd>: Hủy dòng đang gõ dở hoặc dừng lệnh đang chạy</h4>
-<pre><code># KỊCH BẢN: Bạn đang gõ dở một dòng lệnh dài ngoằng bị nhầm, không muốn xóa từng chữ bằng Backspace:
-hocvien@linux-lab:~$ cp -r thu_muc_nham /duong/dan/sai[Bấm Ctrl + C]
-hocvien@linux-lab:~$ cp -r thu_muc_nham /duong/dan/sai^C
-hocvien@linux-lab:~$    ← Trả về dòng nhắc mới tinh ngay lập tức, lệnh trên KHÔNG bị chạy!</code></pre>
-<p>Ngoài ra: Bấm <kbd>Ctrl</kbd>+<kbd>L</kbd> (hoặc gõ lệnh <code>clear</code>) để xóa sạch màn hình cho đỡ rối; gõ <code>history</code> để xem lại danh sách các lệnh bạn đã từng gõ.</p>
-
-<h3>5. Kỹ năng tự tra cứu ngay trong Terminal (<code>man</code>, <code>--help</code>, <code>type</code>)</h3>
-<p>Không ai nhớ hết mọi tùy chọn của hàng trăm câu lệnh. Khi quên một lệnh dùng thế nào, hãy hỏi chính hệ thống:</p>
-<pre><code># 1. Xem sổ tay hướng dẫn của lệnh ls (trên máy thật nhấn phím q để thoát sổ tay):
-hocvien@linux-lab:~$ man ls
-LS(1)
-MÔ TẢ
-    Liệt kê tập tin/thư mục (-l chi tiết, -a cả file ẩn)
-VÍ DỤ
-    ls -la
-
-# 2. Hoặc dùng tùy chọn dài --help gắn vào sau bất kỳ lệnh nào:
-hocvien@linux-lab:~$ cp --help
-
-# 3. Kiểm tra xem một lệnh là lệnh nội bộ của Shell (builtin) hay là chương trình cài trong /usr/bin:
-hocvien@linux-lab:~$ type cd
-cd is a shell builtin
-hocvien@linux-lab:~$ type ls
-ls is /usr/bin/ls</code></pre>
-
-<div class="tip"><b>Cách đọc 3 thông báo lỗi kinh điển bằng tiếng Anh:</b>
-<br>• <code>command not found</code>: Gõ sai tên lệnh (ví dụ gõ <code>sl</code> thay vì <code>ls</code>) hoặc phần mềm đó chưa được cài.
-<br>• <code>No such file or directory</code>: Tên lệnh thì đúng, nhưng <b>tên file hoặc đường dẫn bạn truyền vào không tồn tại</b> (kiểm tra lại chính tả, chữ hoa/thường).
-<br>• <code>Permission denied</code>: File có tồn tại, nhưng tài khoản của bạn <b>không đủ quyền</b> để đọc/sửa/đi vào đó.</div>
+<details class="sec-fold">
+<summary>📖 Bấm để xem: Tự tra cứu lệnh với man, --help và type</summary>
+<div class="sec-content">
+<pre><code>man ls          # Xem sổ tay hướng dẫn đầy đủ (thoát bằng phím q)
+cp --help       # Xem tóm tắt nhanh cách dùng của lệnh cp
+type cd         # Kiểm tra cd là lệnh nội bộ (builtin) hay file thực thi ngoài</code></pre>
+<div class="tip"><b>Cách đọc 3 lỗi kinh điển:</b>
+<br>• <code>command not found</code>: Gõ sai tên lệnh hoặc chưa cài phần mềm.
+<br>• <code>No such file or directory</code>: Sai tên file, sai chữ hoa/thường hoặc đứng sai thư mục.
+<br>• <code>Permission denied</code>: Không đủ quyền truy cập (file bị khóa hoặc thư mục thiếu quyền x).</div>
+</div>
+</details>
 
 <h3>6. Thực hành ngay tại chỗ (Hãy thử đủ 5 bước dưới đây!)</h3>
 <p>Bấm vào khung Terminal bên dưới và thực hành lần lượt:</p>

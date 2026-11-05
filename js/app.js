@@ -40,14 +40,13 @@
   /* ---------- Sidebar ---------- */
   function renderSidebar(route) {
     var h = '<div style="padding:0 8px"><b>Tiến độ của bạn: ' + totalPct() + '%</b></div><div class="pbar"><i style="width:' + totalPct() + '%"></i></div>';
-    h += '<form id="sbSearchForm" style="margin:10px 4px 4px"><input id="sbSearchInp" class="search" style="padding:6px 10px;font-size:.86rem" placeholder="🔍 Tìm bài, lệnh, lỗi…" value="' + esc(lastSearchQuery) + '"></form>';
+    h += '<form id="sbSearchForm" style="margin:10px 4px 6px"><input id="sbSearchInp" class="search" style="padding:6px 10px;font-size:.85rem" placeholder="🔍 Tìm bài, lệnh, lỗi…" value="' + esc(lastSearchQuery) + '"></form>';
     function link(href, text, tick) { return '<a href="' + href + '" class="' + (route === href ? 'active' : '') + '">' + text + (tick ? '<span class="tick">✓</span>' : '') + '</a>'; }
-    h += '<h4>Bắt đầu</h4>' + link('#/', '🏠 Trang chủ') + link('#/mindset', '🧠 Cách học & tư duy') + link('#/search', '🔍 Tìm kiếm toàn trang');
-    h += '<h4>Bài học</h4>';
+    h += '<div style="display:flex;gap:4px;margin:6px 0">' + link('#/', '🏠 Trang chủ') + link('#/mindset', '🧠 Cách học') + '</div>';
+    h += '<h4>📚 Bài học cốt lõi (1 - 8)</h4>';
     LESSONS.forEach(function (l, i) { h += link('#/lesson/' + l.id, (i + 1) + '. ' + esc(l.title.split(' (')[0]), progress.lessons[l.id]); });
-    h += '<h4>Thực hành</h4>' + link('#/practice', '⌨️ Phòng luyện tập', CHALLENGES.every(function (c) { return progress.practice[c.id]; }));
-    h += '<h4>Kỹ năng thực chiến</h4>' + link('#/reading', '👓 Phòng đọc code', READING.every(function (r) { return progress.reading[r.id]; })) + link('#/problems', '🧰 Cẩm nang xử lý sự cố') + link('#/final', '🎯 Checklist cuối khóa', FINAL.every(function (x, i) { return progress.final[i]; }));
-    h += '<h4>Công cụ</h4>' + link('#/cheatsheet', '📖 Tra cứu lệnh') + link('#/videos', '🎬 Video đã kiểm tra') + link('#/resources', '🔗 Tài nguyên khác') + link('#/publish', '🚀 Đăng web & API AI') + link('#/own', '🛠️ Cấu trúc mã nguồn');
+    h += '<h4>⌨️ Phòng luyện tập & Thực chiến</h4>' + link('#/practice', '🎯 7 Thử thách thực hành', CHALLENGES.every(function (c) { return progress.practice[c.id]; })) + link('#/reading', '👓 8 Bài đọc code script', READING.every(function (r) { return progress.reading[r.id]; })) + link('#/problems', '🧰 Cẩm nang 7 sự cố máy chủ') + link('#/final', '🎯 Checklist tốt nghiệp', FINAL.every(function (x, i) { return progress.final[i]; }));
+    h += '<h4>📖 Công cụ hỗ trợ</h4>' + link('#/cheatsheet', '📖 Tra cứu ~58 lệnh nhanh') + link('#/videos', '🎬 20 Video tuyển chọn') + link('#/resources', '🔗 Tài nguyên bên ngoài') + link('#/publish', '🚀 Đăng web & khóa AI');
     sidebar.innerHTML = h;
     sidebar.classList.remove('open');
     var sForm = $('#sbSearchForm', sidebar), sInp = $('#sbSearchInp', sidebar);
@@ -284,32 +283,75 @@
     var idx = LESSONS.map(function (l) { return l.id; }).indexOf(id), L = LESSONS[idx];
     if (!L) return page404();
     var h = '<h1>' + (idx + 1) + '. ' + esc(L.title) + '</h1><div class="meta"><span class="badge">' + L.level + '</span><span>⏱ ~' + L.minutes + ' phút</span><span>📖 Tham chiếu giáo trình: ' + esc(L.src) + '</span></div>';
-    h += L.body;
+    
+    // Tab bar phân lớp bài học: Lý thuyết / Thực hành / Trắc nghiệm
+    h += '<div class="lesson-nav-tabs">' +
+      '<button type="button" class="lesson-tab-btn active" data-tab="theory">📖 1. Lý thuyết &amp; Ví dụ</button>' +
+      '<button type="button" class="lesson-tab-btn" data-tab="lab">⌨️ 2. Terminal gõ thử</button>' +
+      '<button type="button" class="lesson-tab-btn" data-tab="quiz">📝 3. Trắc nghiệm (' + L.quiz.length + ' câu) ' + (progress.quiz[L.id] != null ? '<span class="done">(' + progress.quiz[L.id] + '/' + L.quiz.length + ')</span>' : '') + '</button>' +
+      '</div>';
+
+    // Panel 1: Lý thuyết
+    h += '<div class="lesson-tab-panel" id="panelTheory">' + L.body;
     var relCh = CHALLENGES.filter(function (c) { return c.lesson === L.id || c.id === L.practice; });
     var relRd = READING.filter(function (r) { return r.lesson === L.id; });
     if (relCh.length || relRd.length) {
-      h += '<div class="success" style="background:var(--tip-bg);border-color:var(--tip-line)"><b>🎯 Thực hành & Đọc code gắn với bài học này:</b><ul style="margin:6px 0 0 18px">';
+      h += '<div class="success" style="background:var(--tip-bg);border-color:var(--tip-line);margin-top:18px"><b>🎯 Đề xuất bước tiếp theo cho bài này:</b><ul style="margin:6px 0 0 18px">';
       relCh.forEach(function (ch) {
-        h += '<li>⌨️ Thử thách thực hành: <a href="#/practice/' + ch.id + '"><b>' + esc(ch.title) + '</b></a>' + (progress.practice[ch.id] ? ' <span class="done">✓ Đã xong</span>' : ' <i>(bấm để làm sau khi đọc xong bài)</i>') + '</li>';
+        h += '<li>⌨️ Thử thách chấm điểm: <a href="#/practice/' + ch.id + '"><b>' + esc(ch.title) + '</b></a>' + (progress.practice[ch.id] ? ' <span class="done">✓ Đã xong</span>' : ' <i>(bấm sang làm ngay)</i>') + '</li>';
       });
       relRd.forEach(function (rd) {
-        h += '<li>👓 Luyện đọc code: <a href="#/reading/' + rd.id + '"><b>' + esc(rd.title) + '</b></a>' + (progress.reading[rd.id] ? ' <span class="done">✓ Đã xong</span>' : '') + '</li>';
+        h += '<li>👓 Bài đọc code: <a href="#/reading/' + rd.id + '"><b>' + esc(rd.title) + '</b></a>' + (progress.reading[rd.id] ? ' <span class="done">✓ Đã xong</span>' : '') + '</li>';
       });
       h += '</ul></div>';
     }
-    h += '<section class="quiz"><h3 style="border:0">📝 Kiểm tra nhanh (' + L.quiz.length + ' câu)</h3>';
+    h += '<div class="row" style="margin-top:20px"><button type="button" class="btn" id="goLabBtn">Sang phần gõ thử Terminal →</button><button type="button" class="btn alt" id="goQuizBtn">Làm trắc nghiệm (' + L.quiz.length + ' câu) →</button></div></div>';
+
+    // Panel 2: Thực hành gõ thử (Chia đôi màn hình: bên trái tóm tắt lệnh, bên phải Terminal)
+    h += '<div class="lesson-tab-panel" id="panelLab" hidden>' +
+      '<h3>⌨️ Phòng gõ thử thực hành – ' + esc(L.title) + '</h3>' +
+      '<p>Đọc lệnh hướng dẫn bên dưới và tự gõ vào Terminal để tận mắt thấy kết quả:</p>' +
+      '<div class="mini-term" data-id="' + (sandboxes['t-' + L.id] ? 't-' + L.id : 't-default') + '"></div>' +
+      '<div class="row" style="margin-top:16px"><button type="button" class="btn alt" id="backTheoryBtn">← Xem lại lý thuyết</button><button type="button" class="btn" id="labToQuizBtn">Sang làm trắc nghiệm (' + L.quiz.length + ' câu) →</button></div>' +
+      '</div>';
+
+    // Panel 3: Trắc nghiệm
+    h += '<div class="lesson-tab-panel" id="panelQuiz" hidden><section class="quiz" style="margin-top:0"><h3 style="border:0;margin-top:8px">📝 Kiểm tra nhanh (' + L.quiz.length + ' câu)</h3>';
     L.quiz.forEach(function (q, qi) {
       h += '<div class="qitem" data-q="' + qi + '"><b>' + (qi + 1) + '. ' + esc(q.q) + '</b>';
       q.o.forEach(function (o, oi) { h += '<label><input type="radio" name="q' + qi + '" value="' + oi + '"> ' + esc(o) + '</label>'; });
       h += '<div class="why" hidden></div></div>';
     });
-    h += '<div class="row"><button class="btn" id="gradeBtn" type="button">Chấm điểm</button><span id="score">' + (progress.quiz[L.id] != null ? 'Điểm gần nhất: ' + progress.quiz[L.id] + '/' + L.quiz.length : '') + '</span></div></section>';
+    h += '<div class="row"><button class="btn" id="gradeBtn" type="button">Chấm điểm</button><span id="score">' + (progress.quiz[L.id] != null ? 'Điểm gần nhất: ' + progress.quiz[L.id] + '/' + L.quiz.length : '') + '</span></div></section></div>';
+
     var vids = VIDEOS.filter(function (v) { return v.lessons.indexOf(L.id) >= 0; });
-    if (vids.length) h += '<h3>🎬 Video gợi ý cho bài này</h3><div class="grid">' + videoCards(vids) + '</div>';
+    if (vids.length) {
+      h += '<details class="sec-fold" style="margin-top:20px"><summary>🎬 Video minh họa tuyển chọn cho bài này (' + vids.length + ' video)</summary><div class="sec-content"><div class="grid">' + videoCards(vids) + '</div></div></details>';
+    }
+
     h += '<div class="row" style="margin-top:20px"><button class="btn ' + (progress.lessons[L.id] ? 'alt' : '') + '" id="doneBtn" type="button">' + (progress.lessons[L.id] ? '✓ Đã hoàn thành (bấm để bỏ)' : 'Đánh dấu đã học xong') + '</button><button class="btn alt" id="askBtn" type="button">🤖 Hỏi AI về bài này</button></div>';
     h += '<div class="pager">' + (idx > 0 ? '<a class="btn alt" href="#/lesson/' + LESSONS[idx - 1].id + '">← ' + esc(LESSONS[idx - 1].title.split(' (')[0]) + '</a>' : '<span></span>') + (idx < LESSONS.length - 1 ? '<a class="btn" href="#/lesson/' + LESSONS[idx + 1].id + '">' + esc(LESSONS[idx + 1].title.split(' (')[0]) + ' →</a>' : '<a class="btn" href="#/practice">Sang phòng luyện tập →</a>') + '</div>';
     view.innerHTML = h;
+
+    // Kích hoạt Terminal
     $$('.mini-term').forEach(function (el) { mountTerminal(el, sandboxes[el.getAttribute('data-id')] || defaultSetup); });
+
+    // Xử lý chuyển Tab
+    var tabs = $$('.lesson-tab-btn'), panels = {
+      theory: $('#panelTheory'),
+      lab: $('#panelLab'),
+      quiz: $('#panelQuiz')
+    };
+    function switchTab(name) {
+      tabs.forEach(function (b) { b.classList.toggle('active', b.getAttribute('data-tab') === name); });
+      Object.keys(panels).forEach(function (k) { if (panels[k]) panels[k].hidden = (k !== name); });
+      window.scrollTo(0, 0);
+    }
+    tabs.forEach(function (b) { b.onclick = function () { switchTab(b.getAttribute('data-tab')); }; });
+    if ($('#goLabBtn')) $('#goLabBtn').onclick = function () { switchTab('lab'); };
+    if ($('#goQuizBtn')) $('#goQuizBtn').onclick = function () { switchTab('quiz'); };
+    if ($('#backTheoryBtn')) $('#backTheoryBtn').onclick = function () { switchTab('theory'); };
+    if ($('#labToQuizBtn')) $('#labToQuizBtn').onclick = function () { switchTab('quiz'); };
     $('#gradeBtn').onclick = function () {
       var ok = 0;
       L.quiz.forEach(function (q, qi) {
