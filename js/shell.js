@@ -241,6 +241,7 @@
       var fn = this.cmds[name];
       var r;
       if (!fn) r = { out: '', err: name + ': command not found\n', code: 127 };
+      else if (args.indexOf('--help') >= 0 && name !== 'echo') r = this.cmds.man.call(this, [name]);
       else r = fn.call(this, args, stdin) || { out: '' };
       errAll += r.err || '';
       out = r.out || '';
@@ -318,6 +319,17 @@
     uname: function (a) { return { out: a.indexOf('-a') >= 0 ? 'Linux linux-lab 6.1.0 #1 SMP x86_64 GNU/Linux\n' : 'Linux\n' }; },
     clear: function () { return { clear: true }; },
     echo: function (a) { return { out: a.join(' ') + '\n' }; },
+    type: function (a) {
+      if (!a.length) return { err: 'usage: type name\n', code: 1 };
+      var builtins = ['cd', 'pwd', 'echo', 'type', 'help', 'true', 'false'];
+      var out = '', err = '', self = this;
+      a.forEach(function (n) {
+        if (builtins.indexOf(n) >= 0) out += n + ' is a shell builtin\n';
+        else if (self.cmds[n]) out += n + ' is /usr/bin/' + n + '\n';
+        else err += 'bash: type: ' + n + ': not found\n';
+      });
+      return { out: out, err: err, code: err ? 1 : 0 };
+    },
     true: function () { return { out: '', code: 0 }; },
     false: function () { return { out: '', code: 1 }; },
 

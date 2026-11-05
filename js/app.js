@@ -115,6 +115,12 @@
           if (common.length > c.pre.length) input.value = c.prefix + common;
           else print(promptEl.textContent + input.value + '\n' + c.cands.join('  '));
         }
+      } else if (e.key === 'c' && e.ctrlKey) {
+        e.preventDefault();
+        var cmdC = input.value, prC = promptEl.textContent;
+        line.remove(); line = null;
+        print(prC + cmdC + '^C', 'pr');
+        newLine(); input.focus();
       } else if (e.key === 'l' && e.ctrlKey) { e.preventDefault(); body.innerHTML = ''; var v = input.value; line.remove(); newLine(); input.value = v; input.focus(); }
     }
     body.addEventListener('click', function () { if (input && !getSelection().toString()) input.focus(); });
@@ -177,7 +183,13 @@
   function pageHome() {
     var h = '<section class="hero"><h1>Học Linux từ con số 0 🐧</h1><p>Đọc – gõ lệnh thật – tự kiểm tra – hỏi gia sư AI. Học theo lộ trình rõ ràng, bằng tiếng Việt, trên một terminal mô phỏng an toàn ngay trong trình duyệt.</p><div class="term-demo">hocvien@linux-lab:~$ ls -l\nhocvien@linux-lab:~$ cd Documents &amp;&amp; cat baocao.txt\nhocvien@linux-lab:~/Documents$ <span style="opacity:.6">▌</span></div><div class="row" style="margin-top:18px"><a class="btn" href="#/lesson/' + LESSONS[0].id + '">Bắt đầu bài 1 →</a><a class="btn alt" style="color:#e2e8f0;border-color:#475569" href="#/practice">Vào phòng luyện tập</a><a class="btn alt" style="color:#e2e8f0;border-color:#475569" href="#/search">🔍 Tìm kiếm nhanh</a></div></section>';
     h += '<h3>Tiến độ: ' + totalPct() + '%</h3><div class="pbar" style="margin:0"><i style="width:' + totalPct() + '%"></i></div>';
-    h += '<h3>Lộ trình học</h3><div class="grid">';
+    h += '<h3>🧭 Cách sử dụng trang web này (Quy trình 4 bước cho người mới)</h3>' +
+      '<div class="tip">Trang web chia thành <b>4 khu vực ở thanh menu bên trái</b>. Bạn không cần mở ngẫu nhiên từng mục, hãy đi theo đúng luồng sau:<br>' +
+      '<b>Bước 1 – Học trong mục [BÀI HỌC] (Bài 1 → Bài 8):</b> Đọc lý thuyết kèm ví dụ màn hình mẫu → Gõ thử ngay vào <b>khung Terminal đen nhúng ở cuối bài học đó</b> → Làm <b>8 câu trắc nghiệm</b> cuối bài.<br>' +
+      '<b>Bước 2 – Luyện tay trong [PHÒNG LUYỆN TẬP]:</b> Ngay khi học xong Bài 3, 4, 5, 7, 8, bấm vào <b>Thử thách tương ứng</b> để tự gõ lệnh giải quyết bài toán (hệ thống tự chấm điểm ✓).<br>' +
+      '<b>Bước 3 – Rèn phản xạ công việc ở [KỸ NĂNG THỰC CHIẾN]:</b> Sau khi quen lệnh cơ bản (từ Bài 4–8), vào <a href="#/reading">👓 Phòng đọc code</a> để tập đọc hiểu các đoạn script/lệnh do AI viết và vào <a href="#/problems">🧰 Cẩm nang sự cố</a> để học quy trình bắt bệnh máy chủ.<br>' +
+      '<b>Bước 4 – Dùng [CÔNG CỤ] bất cứ lúc nào quên lệnh:</b> Mở <a href="#/cheatsheet">📖 Tra cứu lệnh</a>, <a href="#/search">🔍 Tìm kiếm toàn trang</a> hoặc xem <a href="#/videos">🎬 Video đã kiểm tra</a> khi cần minh họa trực quan.</div>';
+    h += '<h3>Lộ trình 8 bài học (kèm bài thực hành tương ứng)</h3><div class="grid">';
     LESSONS.forEach(function (l, i) {
       h += '<a class="card" href="#/lesson/' + l.id + '"><h4>' + (i + 1) + '. ' + esc(l.title) + '</h4><p>' + esc(l.summary) + '</p><p style="margin-top:8px"><span class="badge">' + l.level + '</span> ⏱ ' + l.minutes + ' phút ' + (progress.lessons[l.id] ? '<span class="done">✓ Xong</span>' : '') + '</p></a>';
     });
@@ -273,8 +285,19 @@
     if (!L) return page404();
     var h = '<h1>' + (idx + 1) + '. ' + esc(L.title) + '</h1><div class="meta"><span class="badge">' + L.level + '</span><span>⏱ ~' + L.minutes + ' phút</span><span>📖 Tham chiếu giáo trình: ' + esc(L.src) + '</span></div>';
     h += L.body;
-    if (L.practice) { var ch = chById(L.practice); if (ch) h += '<div class="success" style="background:var(--tip-bg);border-color:var(--tip-line)">🎯 <b>Thử thách liên quan:</b> <a href="#/practice/' + ch.id + '">' + esc(ch.title) + '</a>' + (progress.practice[ch.id] ? ' ✓' : '') + '</div>'; }
-    h += '<section class="quiz"><h3 style="border:0">📝 Kiểm tra nhanh</h3>';
+    var relCh = CHALLENGES.filter(function (c) { return c.lesson === L.id || c.id === L.practice; });
+    var relRd = READING.filter(function (r) { return r.lesson === L.id; });
+    if (relCh.length || relRd.length) {
+      h += '<div class="success" style="background:var(--tip-bg);border-color:var(--tip-line)"><b>🎯 Thực hành & Đọc code gắn với bài học này:</b><ul style="margin:6px 0 0 18px">';
+      relCh.forEach(function (ch) {
+        h += '<li>⌨️ Thử thách thực hành: <a href="#/practice/' + ch.id + '"><b>' + esc(ch.title) + '</b></a>' + (progress.practice[ch.id] ? ' <span class="done">✓ Đã xong</span>' : ' <i>(bấm để làm sau khi đọc xong bài)</i>') + '</li>';
+      });
+      relRd.forEach(function (rd) {
+        h += '<li>👓 Luyện đọc code: <a href="#/reading/' + rd.id + '"><b>' + esc(rd.title) + '</b></a>' + (progress.reading[rd.id] ? ' <span class="done">✓ Đã xong</span>' : '') + '</li>';
+      });
+      h += '</ul></div>';
+    }
+    h += '<section class="quiz"><h3 style="border:0">📝 Kiểm tra nhanh (' + L.quiz.length + ' câu)</h3>';
     L.quiz.forEach(function (q, qi) {
       h += '<div class="qitem" data-q="' + qi + '"><b>' + (qi + 1) + '. ' + esc(q.q) + '</b>';
       q.o.forEach(function (o, oi) { h += '<label><input type="radio" name="q' + qi + '" value="' + oi + '"> ' + esc(o) + '</label>'; });
@@ -366,7 +389,19 @@
       '<pre><code>Mẫu câu hỏi tốt:\n"Mình chạy: cp a.txt /etc/\nLỗi: cp: cannot create regular file \'/etc/a.txt\': Permission denied\nMình đoán là thiếu quyền nhưng chưa rõ vì sao /etc cần quyền đặc biệt. Gợi ý giúp mình hướng kiểm tra nhé."</code></pre>' +
       '<h3>4. Quy tắc an toàn</h3><div class="warn"><ul style="margin:0"><li>Học trên tài khoản thường + <code>sudo</code>, không dùng root.</li><li>Máy ảo: chụp <b>snapshot</b> trước khi thử thí nghiệm phá hoại.</li><li>Trước <code>rm</code>, <code>chmod -R</code>, <code>chown -R</code>: chạy <code>pwd</code> và <code>ls</code> kiểm tra.</li><li>Không chạy lệnh dạng <code>curl … | sudo bash</code> từ nguồn không rõ.</li></ul></div>' +
       '<h3>5. Mẫu nhật ký lab</h3><pre><code># ~/linux-lab/nhatky.md\n## 2026-11-02 – Bài: phân quyền\n- Lệnh: chmod 600 bimat.txt\n- Kết quả: ls -l hiện -rw-------\n- Lỗi gặp: Permission denied khi đọc bằng user khác → ĐÚNG như mong đợi\n- Học được: 6=rw-, 0=---, nên chỉ chủ sở hữu đọc/ghi</code></pre>' +
-      '<h3>6. Lộ trình gợi ý (8–10 tuần, theo giáo trình gốc)</h3><table><tr><th>Giai đoạn</th><th>Nội dung</th><th>"Cổng" để qua</th></tr><tr><td>A. Zero (tuần 1–2)</td><td>Bài 1–3</td><td>Tự mkdir/cp/find trong home; giải thích được "/" và "~"</td></tr><tr><td>B. Admin nền (tuần 3–5)</td><td>Bài 4–7</td><td>Tạo user, phân quyền thư mục nhóm, SSH bằng khóa, cài gói, bật dịch vụ</td></tr><tr><td>C. Tự động hóa (tuần 6–7)</td><td>Bài 8</td><td>1 script chạy bằng cron, ghi log</td></tr><tr><td>D. Dự án cuối khóa</td><td>Tổng hợp</td><td>Máy chủ "portal": IP/hostname, user+nhóm, SSH khóa, nginx, firewall, script giám sát</td></tr></table>';
+      '<h3>6. Sơ đồ sử dụng trang web: Học bài nào → Mở mục nào kèm theo?</h3>' +
+      '<p>Để không bị rối giữa các menu bên trái, bạn chỉ cần đi từ trên xuống dưới theo đúng bảng kết nối này:</p>' +
+      '<table><tr><th>Bài học</th><th>Thực hành ngay trong bài</th><th>Thử thách (Phòng luyện tập)</th><th>Kỹ năng thực chiến (Đọc code / Sự cố)</th></tr>' +
+      '<tr><td><b><a href="#/lesson/gioi-thieu">Bài 1. Linux là gì?</a></b></td><td>Gõ <code>ls /</code>, <code>cat /etc/hostname</code> + 8 câu quiz</td><td><i>Chưa cần</i> (làm quen khái niệm)</td><td>Xem <a href="#/videos">🎬 Video bài 1</a></td></tr>' +
+      '<tr><td><b><a href="#/lesson/terminal">Bài 2. Terminal & dòng lệnh</a></b></td><td>Thử <code>ls -l</code>, <code>ls -la</code>, phím <code>Tab</code>, <code>↑</code>, <code>Ctrl+C</code>, <code>man</code> + 8 câu quiz</td><td><i>Chưa cần</i> (tập gõ phím tắt ở Terminal cuối bài)</td><td>Mở thử <a href="#/cheatsheet">📖 Tra cứu lệnh</a></td></tr>' +
+      '<tr><td><b><a href="#/lesson/thu-muc">Bài 3. Cây thư mục & di chuyển</a></b></td><td>Tập <code>pwd</code>, <code>ls -la</code>, <code>cd Documents</code>, <code>cd ..</code> + 8 câu quiz</td><td>👉 <a href="#/practice/dieu-huong">Thử thách 1: Điều hướng & khám phá</a></td><td>Đọc <a href="#/problems">Sự cố 2: No such file or directory</a></td></tr>' +
+      '<tr><td><b><a href="#/lesson/tap-tin">Bài 4. Tập tin & thư mục</a></b></td><td>Tập <code>mkdir</code>, <code>echo &gt;</code>, <code>cp</code>, <code>mv</code>, <code>grep</code>, <code>|</code> + 8 câu quiz</td><td>👉 <a href="#/practice/tao-file">Thử thách 2: Tạo – sao chép – đổi tên</a><br>👉 <a href="#/practice/don-dep">Thử thách 3: Dọn dẹp thư mục</a><br>👉 <a href="#/practice/loc-log">Thử thách 5: Săn lỗi trong log</a></td><td>👉 <a href="#/reading/one-liner">Đọc code 5: Dây chuyền pipe lọc log</a></td></tr>' +
+      '<tr><td><b><a href="#/lesson/phan-quyen">Bài 5. Phân quyền & người dùng</a></b></td><td>Tập đọc <code>ls -l</code>, <code>chmod 700 ho-so</code> + 8 câu quiz</td><td>👉 <a href="#/practice/phan-quyen">Thử thách 4: Phân quyền đúng chỗ</a></td><td>Đọc <a href="#/problems">Sự cố 3: Permission denied</a></td></tr>' +
+      '<tr><td><b><a href="#/lesson/mang-ssh">Bài 6. Mạng cơ bản & SSH</a></b></td><td>Tập <code>ip a</code>, <code>ip route</code>, <code>ping -c 2</code> + 8 câu quiz</td><td>Thực hành trong Terminal bài 6</td><td>Đọc <a href="#/problems">Sự cố 4 & 5: Mất mạng / Không SSH được</a></td></tr>' +
+      '<tr><td><b><a href="#/lesson/van-hanh">Bài 7. Vận hành hệ thống</a></b></td><td>Tập <code>systemctl</code>, <code>journalctl</code>, <code>df -h</code>, <code>ps aux</code> + 8 câu quiz</td><td>👉 <a href="#/practice/cuu-dich-vu">Thử thách 7: Cứu dịch vụ web</a></td><td>👉 <a href="#/reading/dich-vu">Đọc code 4: Kiểm tra dịch vụ</a><br>👉 <a href="#/reading/cron">Đọc code 6: Lịch cron</a><br>Đọc <a href="#/problems">Sự cố 6 & 7: Dịch vụ dừng / Đầy ổ đĩa</a></td></tr>' +
+      '<tr><td><b><a href="#/lesson/shell-script">Bài 8. Shell script đầu tiên</a></b></td><td>Tập <code>find</code>, <code>tar -czf</code>, <code>&amp;&amp;</code>, <code>||</code> + 8 câu quiz</td><td>👉 <a href="#/practice/tim-nen">Thử thách 6: Tìm & đóng gói sao lưu</a></td><td>👉 <a href="#/reading">Hoàn thành các bài Phòng đọc code (1, 2, 3, 7, 8)</a> &amp; <a href="#/final">🎯 Checklist cuối khóa</a></td></tr>' +
+      '</table>' +
+      '<h3>7. Lộ trình gợi ý theo tuần (8–10 tuần, theo giáo trình gốc)</h3><table><tr><th>Giai đoạn</th><th>Nội dung</th><th>"Cổng" để qua</th></tr><tr><td>A. Zero (tuần 1–2)</td><td>Bài 1–3</td><td>Tự mkdir/cp/find trong home; giải thích được "/" và "~"</td></tr><tr><td>B. Admin nền (tuần 3–5)</td><td>Bài 4–7</td><td>Tạo user, phân quyền thư mục nhóm, SSH bằng khóa, cài gói, bật dịch vụ</td></tr><tr><td>C. Tự động hóa (tuần 6–7)</td><td>Bài 8</td><td>1 script chạy bằng cron, ghi log</td></tr><tr><td>D. Dự án cuối khóa</td><td>Tổng hợp</td><td>Máy chủ "portal": IP/hostname, user+nhóm, SSH khóa, nginx, firewall, script giám sát</td></tr></table>';
     enhance(view);
   }
 

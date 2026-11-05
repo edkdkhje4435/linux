@@ -50,7 +50,7 @@ try {
   LESSONS.forEach(function(l){
     go('#/lesson/' + l.id);
     var v = document.getElementById('view');
-    T('lesson ' + l.id + ' h1+quiz', v.querySelector('h1') && v.querySelectorAll('.qitem').length === l.quiz.length);
+    T('lesson ' + l.id + ' h1+quiz (8 questions)', v.querySelector('h1') && l.quiz.length >= 8 && v.querySelectorAll('.qitem').length === l.quiz.length);
     l.quiz.forEach(function(q, qi){ var r = v.querySelector('input[name=q'+qi+'][value="'+q.a+'"]'); r.checked = true; });
     document.getElementById('gradeBtn').click();
     T('lesson ' + l.id + ' quiz all-correct', progressScore(l) === l.quiz.length);
